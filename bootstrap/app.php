@@ -12,8 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // API pura, sin vistas ni login por sesión: nunca redirigir a un
+        // "login" que no existe cuando falta el token.
+        $middleware->redirectGuestsTo(fn () => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // API pura, sin vistas ni login por sesión: cualquier error (incluida
+        // la falta de token) responde en JSON, sin importar el header Accept
+        // del cliente — así nunca intenta redirigir a un "login" que no existe.
+        $exceptions->shouldRenderJsonWhen(fn () => true);
     })->create();
